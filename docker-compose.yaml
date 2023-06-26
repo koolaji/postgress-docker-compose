@@ -1,0 +1,31 @@
+version: '3'
+services:
+  database:
+    image: postgres:14.0
+    container_name: master
+    restart: always
+    volumes:
+        - ./data:/var/lib/postgresql/data
+        - ./postgresql_master.conf:/var/lib/postgresql/postgresql.conf
+        - ./pg_hba_master.conf:/var/lib/postgresql/pg_hba.conf
+        - ./init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      - 'POSTGRES_PASSWORD=123456'
+      #- 'POSTGRES_DB=my_default_database'
+  database1:
+    image: postgres:14.0
+    container_name: slave
+    restart: always
+    volumes:
+        - ./data_slave:/var/lib/postgresql/data
+        - ./init-user-db-slave.sh:/docker-entrypoint-initdb.d/init-user-db-slave.sh
+    depends_on:
+      - database
+#        - ./postgresql_slave.conf:/var/lib/postgresql/postgresql.conf
+#        - ./pg_hba_master.conf:/var/lib/postgresql/pg_hba.conf
+    ports:
+      - "127.0.0.1:5433:5432"
+    environment:
+      - 'POSTGRES_PASSWORD=123456'
